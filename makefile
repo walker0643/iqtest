@@ -1,8 +1,7 @@
 PP= g++
 LD= g++
-CPPFLAGS+= -municode -pipe -m64
-LDFLAGS+= -municode -Wl,--subsystem,windows -static-libgcc -static-libstdc++ -static
-#LDFLAGS+= -v -municode -Wl,--subsystem,windows -static-libgcc -static-libstdc++ -Wl,-Bstatic -lpthread -Wl,-Bdynamic
+CPPFLAGS+= -municode -pipe -Wall -pedantic
+LDFLAGS+= -municode -Wl,--subsystem,windows -static
 
 OBJS= iqtest.o
 EXES_DEBUG= iqtest-debug.exe
@@ -26,4 +25,4 @@ $(EXES_RELEASE): $(OBJS)
 
 .PHONY:clean
 clean:
-	rm -rf *.o
+	rm -f *.o

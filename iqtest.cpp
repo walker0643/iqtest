@@ -54,7 +54,7 @@ class MouseLocker
 		explicit Hider() { while (ShowCursor(FALSE) >= 0); }
 		virtual ~Hider() { while (ShowCursor(TRUE) < 0); }
 	} _hider;
-	
+
 	class Restorer
 	{
 		POINT _pos;
@@ -114,39 +114,29 @@ LRESULT CALLBACK wndproc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 	return DefWindowProc(hwnd, msg, wparam, lparam);
 }
 
-class CaptureWindowClass
-{
-	static const wchar_t* Name;
-
-public:
-	explicit CaptureWindowClass();
-
-	static const wchar_t* name() { return Name; }
-};
-
-/*static*/ const wchar_t* CaptureWindowClass::Name = L"wc_011518_hw";
-
-CaptureWindowClass::CaptureWindowClass()
-{
-	WNDCLASSEX wc { 0 };
-	wc.cbSize = sizeof(WNDCLASSEX);
-	wc.style = CS_VREDRAW | CS_HREDRAW;
-	wc.lpfnWndProc = wndproc;
-	wc.hInstance = GetModuleHandle(NULL);
-	wc.lpszClassName = Name;
-	
-	RegisterClassEx(&wc);
-}
-
 class CaptureWindow
 {
-	static CaptureWindowClass s_wc;
+	static const wchar_t* ClassName;
+
+	static class WindowClass
+	{
+	public:
+		explicit WindowClass()
+		{
+			WNDCLASSEX wc { 0 };
+			wc.cbSize = sizeof(WNDCLASSEX);
+			wc.lpfnWndProc = wndproc;
+			wc.hInstance = GetModuleHandle(NULL);
+			wc.lpszClassName = ClassName;
+			RegisterClassEx(&wc);
+		}
+	} s_wc;
 
 	HWND _hwnd;
 
 public:
 	explicit CaptureWindow()
-		: _hwnd(CreateWindowEx(0, s_wc.name(), L"", WS_POPUP | WS_VISIBLE,
+		: _hwnd(CreateWindowEx(0, ClassName, L"", WS_POPUP | WS_VISIBLE,
 					0, 0, 1, 1, NULL, NULL, GetModuleHandle(NULL), NULL))
 	{ }
 	virtual ~CaptureWindow()
@@ -158,7 +148,8 @@ public:
 	operator HWND() const { return _hwnd; }
 };
 
-/*static*/ CaptureWindowClass CaptureWindow::s_wc;
+/*static*/ const wchar_t* CaptureWindow::ClassName = L"wc_011518_hw";
+/*static*/ CaptureWindow::WindowClass CaptureWindow::s_wc;
 
 static int message_loop()
 {
